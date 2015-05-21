@@ -108,6 +108,8 @@ class user_edit_form extends company_moodleform {
             $mform->addElement('text', 'email', get_string('email'), 'maxlength="100" size="30"');
             $mform->addRule('email', $strrequired, 'required', null, 'client');
             $mform->setType('email', PARAM_EMAIL);
+			$mform->addElement('advcheckbox', 'preference_auth_dupe_email', "Is this a duplicate email?");
+			$mform->setDefault('preference_auth_dupe_email', 0);
         }
         /* /copied from /user/editlib.php */
 
@@ -124,7 +126,7 @@ class user_edit_form extends company_moodleform {
         $mform->addElement('advcheckbox', 'preference_auth_forcepasswordchange', get_string('forcepasswordchange'));
         $mform->addHelpButton('preference_auth_forcepasswordchange', 'forcepasswordchange');
         $mform->setDefault('preference_auth_forcepasswordchange', 1);
-
+		
         $mform->addElement('selectyesno', 'sendnewpasswordemails',
                             get_string('sendnewpasswordemails', 'block_iomad_company_admin'));
         $mform->setDefault('sendnewpasswordemails', 1);
@@ -297,7 +299,7 @@ class user_edit_form extends company_moodleform {
         $usernew = (object)$usernew;
 
         // Validate email.
-        if ($DB->record_exists('user', array('email' => $usernew->email, 'mnethostid' => $CFG->mnet_localhost_id))) {
+        if ($DB->record_exists('user', array('email' => $usernew->email, 'mnethostid' => $CFG->mnet_localhost_id)) && !$usernew->preference_auth_dupe_email) {
             $errors['email'] = get_string('emailexists');
         }
 
@@ -474,7 +476,9 @@ if ($companyform->is_cancelled() || $mform->is_cancelled()) {
             if ($allow) {
                 $count++;
                 $DB->insert_record('companylicense_users',
-                                    array('userid' => $userdata->id, 'licenseid' => $licenseid,
+                                    array('userid' => $userdata->id,
+										  'licenseid' => $licenseid,
+										  'issuedate' => time(),
                                           'licensecourseid' => $licensecourse));
             }
             // Create an email event.
