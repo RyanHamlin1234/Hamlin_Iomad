@@ -26,6 +26,7 @@ require_once($CFG->dirroot.'/local/iomad/pchart2/class/pDraw.class.php');
 require_once($CFG->dirroot.'/local/iomad/pchart2/class/pImage.class.php');
 require_once($CFG->dirroot.'/local/iomad/pchart2/class/pPie.class.php');
 require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(__FILE__).'/locallib.php');
 
 // chart stuff
 define('PCHART_SIZEX', 500);
@@ -263,7 +264,7 @@ if (!empty($dodownload)) {
     header("Pragma: public");
 
 }
-$courseinfo = iomad::get_course_summary_info ($departmentid, 0, $showsuspended);
+$courseinfo = report_completion2::get_course_summary_info ($departmentid, 0, $showsuspended);
 $chartnumusers = array();
 $chartnotstarted = array();
 $chartinprogress = array();
@@ -341,9 +342,9 @@ if (empty($charttype)) {
                 // Only want the data for the page we are on.
                 // courseid==1 is ALL users.
                 if ($courseid == 1) {
-                    $coursedataobj = iomad::get_all_user_course_completion_data($searchinfo, $page, $perpage, $completiontype);
+                    $coursedataobj = report_completion2::get_all_user_course_completion_data($searchinfo, $page, $perpage, $completiontype);
                 } else {
-                    $coursedataobj = iomad::get_user_course_completion_data($searchinfo, $courseid, $page, $perpage, $completiontype);
+                    $coursedataobj = report_completion2::get_user_course_completion_data($searchinfo, $courseid, $page, $perpage, $completiontype);
                 }
                 $coursedata = $coursedataobj->users;
                 $totalcount = $coursedataobj->totalcount;
@@ -351,9 +352,9 @@ if (empty($charttype)) {
         } else {
             if (empty($idlist['0'])) {
                 if ($courseid == 1) {
-                    $coursedataobj = iomad::get_all_user_course_completion_data($searchinfo);
+                    $coursedataobj = report_completion2::get_all_user_course_completion_data($searchinfo);
                 } else {
-                    $coursedataobj = iomad::get_user_course_completion_data($searchinfo, $courseid);
+                    $coursedataobj = report_completion2::get_user_course_completion_data($searchinfo, $courseid);
                 }
                 $coursedata = $coursedataobj->users;
                 $totalcount = $coursedataobj->totalcount;
@@ -569,7 +570,7 @@ if (empty($charttype)) {
     
         if (empty($idlist['0'])) {
             foreach ($coursedata as $userid => $user) {
-                if (empty($user->timestarted)) {
+                if (empty($user->timeenrolled)) {
                     $statusstring = get_string('notstarted', 'local_report_completion2');
                 } else {
                     $statusstring = get_string('started', 'local_report_completion2');
@@ -579,8 +580,8 @@ if (empty($charttype)) {
                 }
     
                 // Get the completion date information.
-                if (!empty($user->timestarted)) {
-                    $starttime = date('jS M Y', $user->timestarted);
+                if (!empty($user->timeenrolled)) {
+                    $starttime = date('jS M Y', $user->timeenrolled);
                 } else {
                     $starttime = "";
                 }
