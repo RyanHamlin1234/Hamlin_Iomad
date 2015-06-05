@@ -88,9 +88,15 @@ class userrep {
                 }
 
             } else {
-                $u->timestarted = 0;
-                $u->status = 'notstarted';
-                ++$notstarted;
+                if (!empty($u->timeenrolled)) {
+                    $u->timecompleted = $u->timeenrolled;
+                    $u->status = 'inprogress';
+                    ++$inprogress;
+                } else {
+                    $u->timestarted = 0;
+                    $u->status = 'notstarted';
+                    ++$notstarted;
+                }
             }
 
         } else {
